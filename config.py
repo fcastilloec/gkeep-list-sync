@@ -9,6 +9,7 @@ from pydantic import BaseModel, AnyHttpUrl, FilePath, EmailStr
 PKG_NAME = "gkeep-shopping"
 CONFIG_NAME = "config.json"
 UPDATED_NAME = "last_updated.json"
+TOKEN_NAME = "token.json"
 
 
 class Config(BaseModel):
@@ -26,6 +27,12 @@ class Updated(BaseModel):
 
     google_keep: datetime
     home_assistant: datetime
+
+
+class Token(BaseModel):
+    """Token object."""
+
+    token: str
 
 
 def __get_config_dir() -> str:
@@ -65,6 +72,15 @@ def get_config() -> dict:
     return Config.parse_file(config_path)
 
 
+def get_token() -> str:
+    """Get the token."""
+    config_path = path.join(__get_config_dir(), TOKEN_NAME)
+    try:
+        return Token.parse_file(config_path).token
+    except FileNotFoundError:
+        return None
+
+
 def get_updated_time() -> dict:
     """Get the last updated form."""
     config_path = path.join(__get_config_dir(), UPDATED_NAME)
@@ -72,6 +88,12 @@ def get_updated_time() -> dict:
         return Updated.parse_file(config_path)
     except FileNotFoundError:
         return Updated(google_keep=0, home_assistant=0)
+
+
+def save_token(token: str) -> None:
+    """Save the updated object."""
+    with open(path.join(__get_config_dir(), TOKEN_NAME), "wt", encoding="utf8") as file:
+        file.write(Token(token=token).json())
 
 
 def save_updated_time(google_keep: datetime, home_assistant: datetime) -> None:

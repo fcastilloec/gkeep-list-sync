@@ -4,7 +4,7 @@
 import sys
 from os import environ
 import gkeepapi
-from config import get_config, get_updated_time, save_updated_time
+from config import get_config, get_updated_time, get_token, save_updated_time, save_token
 
 if environ.get("PYTHON_ENV") == "development":
     import ha_list_local as ha_list
@@ -13,11 +13,26 @@ else:
 
 
 config = get_config()
+token = get_token()
 last_updated = get_updated_time()
 
 # Load Google Keep List
 keep = gkeepapi.Keep()
-keep.login(config.email, config.password)
+if token:
+    # Resume from existing session
+    try:
+        keep.resume(config.email, token)
+    except gkeepapi.exception.LoginException as error:
+        if str(error) == "BadAuthentication":
+            keep.login(config.email, config.password)
+            save_token(keep.getMasterToken())
+        else:
+            raise error
+else:
+    # Login for first time
+    keep.login(config.email, config.password)
+    save_token(keep.getMasterToken())
+
 gkeeplist = keep.get(config.noteID)
 
 # Load Home Assistant Shopping list
