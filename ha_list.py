@@ -30,7 +30,7 @@ class ShoppingList:
 
     def ___load(self):
         """Load items and last updated time."""
-        self._updated = datetime.fromtimestamp(path.getmtime(self.__list_path))
+        self._updated = datetime.utcfromtimestamp(path.getmtime(self.__list_path))
         self._items = self.__read_list()
 
     def __read_list(self):
@@ -78,10 +78,10 @@ class ShoppingList:
         """Deletes all items."""
         if not checked_only:
             # First we mark all items as completed.
-            body = {"service": Actions.COMPLETE_ALL.value, "name": ""}
+            body = {"service": Actions.COMPLETE_ALL.value}
             requests.post(self.__api_url, json=body, timeout=self.__TIMEOUT)
 
         # Then we clear all completed items.
-        body = {"service": Actions.CLEAR_COMPLETED.value, "name": ""}
+        body = {"service": Actions.CLEAR_COMPLETED.value}
         requests.post(self.__api_url, json=body, timeout=self.__TIMEOUT)
         self.___load()  # reloads items
