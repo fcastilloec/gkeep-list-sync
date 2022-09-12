@@ -65,7 +65,7 @@ def get_config() -> dict:
     return Config.parse_file(config_path)
 
 
-def get_updated() -> dict:
+def get_updated_time() -> dict:
     """Get the last updated form."""
     config_path = path.join(__get_config_dir(), UPDATED_NAME)
     try:
@@ -74,7 +74,7 @@ def get_updated() -> dict:
         return Updated(google_keep=0, home_assistant=0)
 
 
-def save_updated(google_keep: datetime, home_assistant: datetime) -> None:
+def save_updated_time(google_keep: datetime, home_assistant: datetime) -> None:
     """Save the updated object."""
     with open(path.join(__get_config_dir(), UPDATED_NAME), "wt", encoding="utf8") as file:
         file.write(Updated(google_keep=google_keep, home_assistant=home_assistant).json())

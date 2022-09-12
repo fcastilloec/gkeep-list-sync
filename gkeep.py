@@ -4,7 +4,7 @@
 import sys
 from os import environ
 import gkeepapi
-from config_file import get_config, get_updated, save_updated
+from config import get_config, get_updated_time, save_updated_time
 
 if environ.get("PYTHON_ENV") == "development":
     import ha_list_local as ha_list
@@ -13,7 +13,7 @@ else:
 
 
 config = get_config()
-last_updated = get_updated()
+last_updated = get_updated_time()
 
 # Load Google Keep List
 keep = gkeepapi.Keep()
@@ -59,4 +59,4 @@ else:
 
 keep.sync()
 
-save_updated(gkeeplist.timestamps.updated, halist.updated)
+save_updated_time(gkeeplist.timestamps.updated, halist.updated)
