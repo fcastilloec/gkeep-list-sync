@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Gets the configuration from a file."""
+"""Gets the configuration data."""
 
 from os import geteuid, environ, path
 from sys import stderr, platform, path as __dirname
 from datetime import datetime
-from pydantic import BaseModel, AnyHttpUrl, FilePath, EmailStr
+from pydantic import BaseModel, AnyHttpUrl, EmailStr
 
 PKG_NAME = "gkeep-shopping"
 CONFIG_NAME = "config.json"
@@ -19,14 +19,12 @@ class Config(BaseModel):
     password: str
     webhook: AnyHttpUrl
     noteID: str
-    listPath: FilePath
 
 
 class Updated(BaseModel):
     """Updated object."""
 
     google_keep: datetime
-    home_assistant: datetime
 
 
 class Token(BaseModel):
@@ -85,9 +83,9 @@ def get_updated_time() -> dict:
     """Get the last updated form."""
     config_path = path.join(__get_config_dir(), UPDATED_NAME)
     try:
-        return Updated.parse_file(config_path)
+        return Updated.parse_file(config_path).google_keep
     except FileNotFoundError:
-        return Updated(google_keep=0, home_assistant=0)
+        return datetime.utcfromtimestamp(0)
 
 
 def save_token(token: str) -> None:
@@ -96,7 +94,7 @@ def save_token(token: str) -> None:
         file.write(Token(token=token).json())
 
 
-def save_updated_time(google_keep: datetime, home_assistant: datetime) -> None:
+def save_updated_time(google_keep_time: datetime) -> None:
     """Save the updated object."""
     with open(path.join(__get_config_dir(), UPDATED_NAME), "wt", encoding="utf8") as file:
-        file.write(Updated(google_keep=google_keep, home_assistant=home_assistant).json())
+        file.write(Updated(google_keep=google_keep_time).json())

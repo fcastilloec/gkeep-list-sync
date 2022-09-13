@@ -2,6 +2,5 @@
   "email": "john.doe@gmail.com",
   "password": "password",
   "noteID": "this_is_a_long_string_of_characters",
-  "webhook": "http://a-valid-home-assistant-webhook-url",
-  "listPath": "path_to_.shopping_list.json"
+  "webhook": "http://a-valid-home-assistant-webhook-url"
 }
