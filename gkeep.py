@@ -33,7 +33,6 @@ gkeeplist = keep.get(config.noteID)
 
 # Don't update if nothing has changed
 if gkeeplist.timestamps.updated == last_updated:
-    print("Nothing to sync.")
     sys.exit()
 
 # Check if there are items to add
