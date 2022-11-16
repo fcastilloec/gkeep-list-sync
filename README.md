@@ -1,33 +1,30 @@
-# gkeep-shopping
+# gkeep-list-sync
 
-This project allows you to add items to your **Home Assistant Shopping list** from a **Google Keep Note**.
-This is intended to be paired with the Google Assistant feature of adding items to a Google Keep Note,
-which will be forwarded to Home Assistant.
-This is only a workaround since Google removed the option to use advanced voice commands from IFTTT.
-
-This project is a successor of the original **ifttt-server** which used IFTTT and Evernote to keep track of groceries.
+A Home Assistant custom integration for adding items to your **Home Assistant Shopping List** from a **Google Keep** list.
+The integration relies on [gkeepapi](https://github.com/kiwiz/gkeepapi) for the synchronization.
+This is meant to be used with Google Assistant to easily add items to Home Assistant Shopping List.
 
 ## Requirements
 
-- Python, `gkeepapi`, `pydantic`, `email-validator`, and `requests`
 - A Google email and password to retrieve the note.
-  See `gkeepapi` [Logging in](https://gkeepapi.readthedocs.io/en/latest/#logging-in) documentation for more details.
-- A Google Keep note ID.
-  See `gkeepapi` [Getting Notes](https://gkeepapi.readthedocs.io/en/latest/#getting-notes) documentation for more details.
-- A Home Assistant webhook URL to interact with the Shopping List integration.
+  Using an app password is recommended.
 
-## Configuration
+## Installation
 
-We save the configuration and all other necessary files under the following directory:
+1. Use the tool of choice to open the directory for your HA configuration (where you find configuration.yaml).
+2. If you do not have a custom_components directory there, you need to create it.
+3. In the custom*components directory create a new folder called \_gkeep_list_sync*.
+4. Download all the files from the custom_components/gkeep_list_sync/ directory in this repository.
+5. Place the files you downloaded in the new directory you created.
+6. Restart Home Assistant.
+7. In the Home Assistant Configuration, add the new integration by searching for its name.
 
-- `%APPDATA%\gkeep-shopping` on Windows
-- `$XDG_CONFIG_HOME/gkeep-shopping` or `~/.config/gkeep-shopping` on Linux
-- `~/Library/Application Support/gkeep-shopping` on macOS
+## Usage
 
-The main configuration file is named `config.json` and should be placed in the directory mentioned previously.
-There's a template for it here: [`templates/config.json`](https://github.com/fcastilloec/gkeep-shopping/blob/master/templates/config.json)
+The integration adds a service call that can be used on any automation to synchronize Google Keep List with Home Assistant Shopping List.
 
-## Running the script
+The service goes through the following steps:
 
-The main script is called `gkeep.py` and can be called using python.
-It's recommended to run the script on a regular interval to regularly add items to Home Assistant.
+1. Reads all unchecked items from the specified Google Keep list. Checked items are ignored.
+2. Adds each item to Home Assistant Shopping List integration.
+3. Delete the item from Google Keep list. This prevent double adding an item if the service is called again.

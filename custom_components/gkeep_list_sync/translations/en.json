@@ -1,0 +1,23 @@
+{
+    "config": {
+        "abort": {
+            "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
+            "reauth_successful": "Re-authentication was successful",
+            "single_instance_allowed": "Already configured. Only a single configuration possible."
+        },
+        "error": {
+            "cannot_login": "Failed to connect",
+            "list_not_found": "Google Keep List not found",
+            "unknown": "Unexpected error"
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "list_title": "List title",
+                    "password": "Password",
+                    "username": "Username"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,2 @@
+sync_list:
+  description: Synchronize Google Keep list with a Home Assistant Shopping List, and delete the already synced items from Google Keep
