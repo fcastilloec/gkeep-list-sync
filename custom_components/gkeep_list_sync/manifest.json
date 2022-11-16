@@ -1,0 +1,11 @@
+{
+  "domain": "gkeep_list_sync",
+  "name": "Google Keep List Sync",
+  "config_flow": true,
+  "documentation": "https://github.com/fcastilloec/gkeep-list-sync/README.md",
+  "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
+  "requirements": ["gkeepapi==0.14.2"],
+  "dependencies": ["shopping_list"],
+  "codeowners": ["@fcastilloec"],
+  "integration_type": "service"
+}

@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "username": "[%key:common::config_flow::data::username%]",
+          "password": "[%key:common::config_flow::data::password%]",
+          "list_title": "List title"
+        }
+      }
+    },
+    "error": {
+      "cannot_login": "[%key:common::config_flow::error::cannot_connect%]",
+      "unknown": "[%key:common::config_flow::error::unknown%]",
+      "list_not_found": "Google Keep List not found"
+    },
+    "abort": {
+      "single_instance_allowed": "[%key:common::config_flow::abort::single_instance_allowed%]",
+      "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
+      "reauth_successful": "Re-authentication was successful"
+    }
+  }
+}
