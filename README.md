@@ -1,5 +1,7 @@
 # gkeep-list-sync
 
+[![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://github.com/hacs/integration)
+
 A Home Assistant custom integration for adding items to your **Home Assistant Shopping List** from a **Google Keep** list.
 The integration relies on [gkeepapi](https://github.com/kiwiz/gkeepapi) for the synchronization.
 This is meant to be used with Google Assistant to easily add items to Home Assistant Shopping List.
