@@ -1,6 +1,7 @@
 {
   "domain": "gkeep_list_sync",
   "name": "Google Keep List Sync",
+  "version": "1.0.0",
   "config_flow": true,
   "documentation": "https://github.com/fcastilloec/gkeep-list-sync/README.md",
   "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
