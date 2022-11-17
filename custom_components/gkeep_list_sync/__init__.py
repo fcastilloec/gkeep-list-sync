@@ -16,6 +16,7 @@ from .const import (
     CONF_LIST_ID,
     SHOPPING_LIST_DOMAIN,
     MISSING_LIST,
+    SERVICE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -83,6 +84,14 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         await hass.async_add_executor_job(keep.sync)
 
     # Register the service
-    hass.services.async_register(DOMAIN, "sync_list", handle_sync_list)
+    hass.services.async_register(DOMAIN, SERVICE, handle_sync_list)
 
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:  # pylint: disable=unused-argument
+    """Unload a config entry."""
+    _LOGGER.debug("Unload integration")
+    hass.services.async_remove(DOMAIN, SERVICE)
+    del hass.data[DOMAIN]
     return True
