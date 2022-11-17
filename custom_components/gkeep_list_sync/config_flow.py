@@ -176,7 +176,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.username = data[CONF_USERNAME]
         self.list_title = data[CONF_LIST_TITLE]
         self.reauth = True
-        self.missing_list = data[MISSING_LIST]
+        self.missing_list = self.hass.data[DOMAIN][MISSING_LIST]
         return await self.async_step_user()
 
 

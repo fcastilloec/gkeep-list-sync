@@ -24,6 +24,8 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up of Google Keep List component."""
 
+    hass.data.setdefault(DOMAIN, {})
+
     # Check for dependencies
     if not hass.data.get(SHOPPING_LIST_DOMAIN):
         _LOGGER.error(
@@ -40,6 +42,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             config_entry.data.get(CONF_ACCESS_TOKEN),
         )
     except LoginException as ex:
+        hass.data[DOMAIN] = {MISSING_LIST: False}  # the credentials are the problem
         raise ConfigEntryAuthFailed from ex
     except APIException as ex:
         _LOGGER.error(
@@ -50,11 +53,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         return False
 
     if not keep.get(config_entry.data.get(CONF_LIST_ID)):
-        hass.config_entries.async_update_entry(
-            config_entry,
-            data={**config_entry.data, MISSING_LIST: True},
-        )
-        raise ConfigEntryAuthFailed("List couldn't be found, please reauthenticate")
+        hass.data[DOMAIN] = {MISSING_LIST: True}  # the list is the problem
+        raise ConfigEntryAuthFailed
 
     async def handle_sync_list(call) -> None:  # pylint: disable=unused-argument
         """Handle synchronizing the Google Keep list with Shopping list"""
@@ -62,10 +62,11 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         # Sync to get any new items
         await hass.async_add_executor_job(keep.sync)
 
+        # Check if the list still exists
         if not (glist := keep.get(config_entry.data.get(CONF_LIST_ID))):
-            raise InvalidStateError("List couldn't be found, please reauthenticate")
-
-        _LOGGER.debug("service: %s", glist)
+            hass.data[DOMAIN] = {MISSING_LIST: True}  # the list is the problem
+            config_entry.async_start_reauth(hass)
+            return
 
         # Add items to HA and delete from Google Keep
         for item in glist.unchecked:
@@ -81,6 +82,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         # Sync again to delete already added items
         await hass.async_add_executor_job(keep.sync)
 
+    # Register the service
     hass.services.async_register(DOMAIN, "sync_list", handle_sync_list)
 
     return True
