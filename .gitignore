@@ -1,6 +1,8 @@
 __pycache__/
-venv/
+.venv/
 test.py
+requirements.txt
+requirements-dev.txt
 
 config
 TODO
