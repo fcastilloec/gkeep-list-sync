@@ -1,13 +1,13 @@
 {
   "domain": "gkeep_list_sync",
   "name": "Google Keep List Sync",
-  "version": "1.0.3",
+  "codeowners": ["@fcastilloec"],
   "config_flow": true,
-  "iot_class": "cloud_polling",
+  "dependencies": ["shopping_list"],
   "documentation": "https://github.com/fcastilloec/gkeep-list-sync/blob/main/README.md",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
   "requirements": ["gkeepapi==0.15.1", "urllib3<2", "gpsoauth==1.0.2"],
-  "dependencies": ["shopping_list"],
-  "codeowners": ["@fcastilloec"],
-  "integration_type": "service"
+  "version": "1.0.3"
 }
