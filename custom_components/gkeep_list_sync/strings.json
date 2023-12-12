@@ -5,7 +5,8 @@
         "data": {
           "username": "[%key:common::config_flow::data::username%]",
           "password": "[%key:common::config_flow::data::password%]",
-          "list_title": "List title"
+          "list_title": "List title",
+          "master_token": "Master Token"
         }
       }
     },

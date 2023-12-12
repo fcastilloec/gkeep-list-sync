@@ -29,6 +29,7 @@ from .const import (
     CONF_LIST_ID,
     DEFAULT_LIST_TITLE,
     MISSING_LIST,
+    MASTER_TOKEN
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -52,6 +53,13 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
                 keep.resume,
                 config_entry.data.get(CONF_USERNAME),
                 config_entry.data.get(CONF_ACCESS_TOKEN),
+            )
+        elif data[MASTER_TOKEN] is not None:
+            config[CONF_USERNAME] = data[CONF_USERNAME]
+            await hass.async_add_executor_job(
+                keep.resume,
+                data[CONF_USERNAME],
+                data[MASTER_TOKEN]
             )
         else:
             config[CONF_USERNAME] = data[CONF_USERNAME]
@@ -86,7 +94,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Keep List Sync."""
 
-    VERSION = 1
+    VERSION = 2
 
     def __init__(self) -> None:
         """Initialize the Google Keep config flow."""
@@ -121,14 +129,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_USERNAME,
                     default=self.username,
                 ): str,
-                vol.Required(
-                    CONF_PASSWORD,
-                ): str,
+                vol.Optional(CONF_PASSWORD): str,
+                vol.Optional(MASTER_TOKEN): str,
                 vol.Required(
                     CONF_LIST_TITLE,
                     default=self.list_title,
                 ): str,
-            }
+            },
         )
 
         # Schema for List name re-auth
