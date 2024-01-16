@@ -1,3 +1,4 @@
 {
-  "name": "Google Keep List Sync"
+  "name": "Google Keep List Sync",
+  "homeassistant": "2023.11.0"
 }

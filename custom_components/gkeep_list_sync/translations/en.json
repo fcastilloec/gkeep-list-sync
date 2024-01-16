@@ -1,24 +1,30 @@
 {
-    "config": {
-        "abort": {
-            "already_configured": "List is already configured",
-            "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
-            "reauth_successful": "Re-authentication was successful"
-        },
-        "error": {
-            "cannot_login": "Failed to connect",
-            "list_not_found": "Google Keep List not found",
-            "unknown": "Unexpected error"
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "list_title": "List title",
-                    "password": "Password",
-                    "username": "Username",
-                    "master_token": "Master Token"
-                }
-            }
+  "config": {
+    "abort": {
+      "already_configured": "List is already configured",
+      "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
+      "reauth_successful": "Re-authentication was successful"
+    },
+    "error": {
+      "cannot_login": "Failed to connect",
+      "list_not_found": "Google Keep List not found",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "user": {
+        "data": {
+          "list_title": "List title",
+          "password": "Password",
+          "username": "Username",
+          "master_token": "Master Token"
         }
+      }
     }
+  },
+  "services": {
+    "sync_list": {
+      "name": "Synchronize lists",
+      "description": "Synchronize Google Keep list with a Home Assistant Shopping List, and delete the already synced items from Google Keep"
+    }
+  }
 }
