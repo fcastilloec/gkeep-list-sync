@@ -99,3 +99,20 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 def get_service_name(config_entry: ConfigEntry) -> str:
     """Retrieves the name for running a service."""
     return SERVICE_NAME_BASE + "_" + config_entry.data.get(CONF_BASE_USERNAME)
+
+async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
+    """Migrate from an old configuration version."""
+    _LOGGER.debug("Migrating from version %s", config_entry.version)
+
+    if config_entry.version == 1:
+        base_username = config_entry.data[CONF_USERNAME].partition("@")[0]
+        unique_id = f"{base_username}-{config_entry.data[CONF_LIST_ID]}"
+        data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
+        hass.config_entries.async_update_entry(
+            config_entry, unique_id=unique_id, data=data
+        )
+        config_entry.version = 2
+
+    _LOGGER.info("Migration to version %s successful", config_entry.version)
+
+    return True
