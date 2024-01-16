@@ -43,7 +43,7 @@ async def validate_input(
 ) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
 
-    config = {}
+    config: dict[str, Any] = {}
     keep = Keep()
 
     try:
@@ -102,14 +102,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         """Initialize the Google Keep config flow."""
-        self.username = None
-        self.list_title = DEFAULT_LIST_TITLE
-        self.reauth_entry = None
-        self.missing_list = False
+        self._username: str = None
+        self._list_title: str = DEFAULT_LIST_TITLE
+        self._reauth_entry: config_entries.ConfigEntry | None = None
+        self._missing_list: bool = False
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
-        errors = {}
+        errors: dict[str, Any] = {}
 
         # Check that the dependency is loaded
         if not self.hass.data.get(SHOPPING_LIST_DOMAIN):
@@ -118,7 +118,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                config_data = await validate_input(self.hass, user_input, self.reauth_entry)
+                config_data = await validate_input(self.hass, user_input, self._reauth_entry)
             except CannotLogin:
                 errors["base"] = "cannot_login"
             except Exception as ex:  # pylint: disable=broad-except
@@ -126,10 +126,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = "unknown"
 
             if not errors:
-                if self.reauth_entry:
+                if self._reauth_entry:
                     _LOGGER.debug("Updating Config Entry because of re-authentication")
-                    self.hass.config_entries.async_update_entry(self.reauth_entry, data=config_data)
-                    await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                    self.hass.config_entries.async_update_entry(self._reauth_entry, data=config_data)
+                    await self.hass.config_entries.async_reload(self._reauth_entry.entry_id)
                     return self.async_abort(reason="reauth_successful")
 
                 _LOGGER.debug("Config Entry didn't exists, creating one")
@@ -146,11 +146,11 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     def _async_schema(self):
         """Fetch required schema with defaults."""
-        if self.missing_list:
+        if self._missing_list:
             # Schema for specifying only a new list name
             return vol.Schema(
                 {
-                    vol.Required(CONF_LIST_TITLE, default=self.list_title): str,
+                    vol.Required(CONF_LIST_TITLE, default=self._list_title): str,
                 }
             )
 
@@ -158,20 +158,20 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         msg="A Password or Master Token is needed but not both"
         return vol.Schema(
             {
-                vol.Required(CONF_USERNAME, default=self.username): str,
+                vol.Required(CONF_USERNAME, default=self._username): str,
                 vol.Exclusive(CONF_PASSWORD, 'password/token', msg=msg): str,
                 vol.Exclusive(MASTER_TOKEN, 'password/token', msg=msg): str,
-                vol.Required(CONF_LIST_TITLE, default=self.list_title): str,
+                vol.Required(CONF_LIST_TITLE, default=self._list_title): str,
             }
         )
 
     async def async_step_reauth(self, data: Mapping[str, Any]) -> FlowResult:
         """Handle configuration by re-auth."""
         _LOGGER.debug("Re-authentication needed")
-        self.username = data[CONF_USERNAME]
-        self.list_title = data[CONF_LIST_TITLE]
-        self.missing_list = data[MISSING_LIST]
-        self.reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        self._username = data[CONF_USERNAME]
+        self._list_title = data[CONF_LIST_TITLE]
+        self._missing_list = data[MISSING_LIST]
+        self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         return await self.async_step_user()
 
 class CannotLogin(HomeAssistantError):

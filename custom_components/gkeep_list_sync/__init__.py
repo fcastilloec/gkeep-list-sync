@@ -45,7 +45,6 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
             config_entry.data.get(CONF_ACCESS_TOKEN),
         )
     except LoginException as ex:
-        hass.data[DOMAIN] = {MISSING_LIST: False}  # the credentials are the problem
         raise ConfigEntryAuthFailed from ex
     except APIException as ex:
         _LOGGER.error(
