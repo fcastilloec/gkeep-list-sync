@@ -29,8 +29,7 @@ from .const import (
     CONF_LIST_ID,
     CONF_BASE_USERNAME,
     DEFAULT_LIST_TITLE,
-    MISSING_LIST,
-    MASTER_TOKEN
+    MISSING_LIST
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -54,12 +53,12 @@ async def validate_input(
                 reauth_entry.data.get(CONF_USERNAME),
                 reauth_entry.data.get(CONF_ACCESS_TOKEN),
             )
-        elif user_input.get(MASTER_TOKEN):
+        elif user_input.get(CONF_ACCESS_TOKEN):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
             await hass.async_add_executor_job(
                 keep.resume,
                 user_input[CONF_USERNAME],
-                user_input[MASTER_TOKEN]
+                user_input[CONF_ACCESS_TOKEN]
             )
         elif user_input.get(CONF_PASSWORD):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
@@ -160,7 +159,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             {
                 vol.Required(CONF_USERNAME, default=self._username): str,
                 vol.Exclusive(CONF_PASSWORD, 'password/token', msg=msg): str,
-                vol.Exclusive(MASTER_TOKEN, 'password/token', msg=msg): str,
+                vol.Exclusive(CONF_ACCESS_TOKEN, 'password/token', msg=msg): str,
                 vol.Required(CONF_LIST_TITLE, default=self._list_title): str,
             }
         )

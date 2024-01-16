@@ -69,7 +69,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
         # Check if the list still exists
         if not (glist := keep.get(config_entry.data.get(CONF_LIST_ID))):
-            _LOGGER.debug("List '%s' couldn't be found when syncing", config_entry.data.get(CONF_LIST_TITLE))
+            _LOGGER.error("List '%s' couldn't be found when syncing", config_entry.data.get(CONF_LIST_TITLE))
             hass.config_entries.async_update_entry(
                 config_entry, data={**config_entry.data, MISSING_LIST: True},
             ) # Update config to inform that the list is the problem
