@@ -5,7 +5,7 @@
   "config_flow": true,
   "documentation": "https://github.com/fcastilloec/gkeep-list-sync/blob/main/README.md",
   "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
-  "requirements": ["gkeepapi==0.14.2", "urllib3<2", "gpsoauth==1.0.2"],
+  "requirements": ["gkeepapi==0.15.1", "urllib3<2", "gpsoauth==1.0.2"],
   "dependencies": ["shopping_list"],
   "codeowners": ["@fcastilloec"],
   "integration_type": "service"

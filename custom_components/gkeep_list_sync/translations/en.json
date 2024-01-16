@@ -15,7 +15,8 @@
                 "data": {
                     "list_title": "List title",
                     "password": "Password",
-                    "username": "Username"
+                    "username": "Username",
+                    "master_token": "Master Token"
                 }
             }
         }

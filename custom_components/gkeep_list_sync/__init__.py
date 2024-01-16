@@ -16,7 +16,7 @@ from .const import (
     CONF_LIST_ID,
     SHOPPING_LIST_DOMAIN,
     MISSING_LIST,
-    SERVICE,
+    SERVICE_NAME_BASE,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -83,8 +83,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         # Sync again to delete already added items
         await hass.async_add_executor_job(keep.sync)
 
-    # Register the service
-    hass.services.async_register(DOMAIN, SERVICE, handle_sync_list)
+    # Register the service - Allow for as many services as we have usernames
+    hass.services.async_register(DOMAIN, get_service_name(config_entry), handle_sync_list)
 
     return True
 
@@ -92,6 +92,8 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:  # pylint: disable=unused-argument
     """Unload a config entry."""
     _LOGGER.debug("Unload integration")
-    hass.services.async_remove(DOMAIN, SERVICE)
-    del hass.data[DOMAIN]
+    hass.services.async_remove(DOMAIN, get_service_name(config_entry))
     return True
+
+def get_service_name(config_entry: ConfigEntry) -> str:
+    return SERVICE_NAME_BASE + "_" + config_entry.data.get(CONF_USERNAME).partition("@")[0]

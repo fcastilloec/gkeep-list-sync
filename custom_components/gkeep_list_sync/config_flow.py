@@ -29,6 +29,7 @@ from .const import (
     CONF_LIST_ID,
     DEFAULT_LIST_TITLE,
     MISSING_LIST,
+    MASTER_TOKEN
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -53,6 +54,16 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
                 config_entry.data.get(CONF_USERNAME),
                 config_entry.data.get(CONF_ACCESS_TOKEN),
             )
+        elif data.get(MASTER_TOKEN) is not None:
+            config[CONF_USERNAME] = data[CONF_USERNAME]
+            await hass.async_add_executor_job(
+                keep.resume,
+                data[CONF_USERNAME],
+                data[MASTER_TOKEN]
+            )
+        elif data.get(MASTER_TOKEN) is None and data.get(CONF_PASSWORD) is None:
+            _LOGGER.error("A password or master token is needed to setup a new service for gkeep-list-sync")
+            raise(InvalidConfig())
         else:
             config[CONF_USERNAME] = data[CONF_USERNAME]
             await hass.async_add_executor_job(
@@ -86,7 +97,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Keep List Sync."""
 
-    VERSION = 1
+    VERSION = 2
 
     def __init__(self) -> None:
         """Initialize the Google Keep config flow."""
@@ -99,20 +110,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Handle the initial step."""
         errors = {}
 
+        config_entry: config_entries.ConfigEntry = None
+
         # Check that the dependency is loaded
         if not self.hass.data.get(SHOPPING_LIST_DOMAIN):
             _LOGGER.error("Shopping List integration needs to be setup")
             return self.async_abort(reason="dependency_not_found")
-
-        # Get any current configuration entries
-        if self._async_current_entries():
-            config_entry = self._async_current_entries()[0]
-        else:
-            config_entry = None
-
-        # Check that single instance of the config is allowed
-        if config_entry and not self.reauth:
-            return self.async_abort(reason="single_instance_allowed")
 
         # Schema for initial setup of loging re-auth
         all_schema = vol.Schema(
@@ -121,14 +124,13 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_USERNAME,
                     default=self.username,
                 ): str,
-                vol.Required(
-                    CONF_PASSWORD,
-                ): str,
+                vol.Optional(CONF_PASSWORD): str,
+                vol.Optional(MASTER_TOKEN): str,
                 vol.Required(
                     CONF_LIST_TITLE,
                     default=self.list_title,
                 ): str,
-            }
+            },
         )
 
         # Schema for List name re-auth
@@ -179,6 +181,8 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self.missing_list = self.hass.data[DOMAIN][MISSING_LIST]
         return await self.async_step_user()
 
-
 class CannotLogin(HomeAssistantError):
     """Error to indicate we cannot login."""
+
+class InvalidConfig(HomeAssistantError):
+    """Error to indicate the user entered invalid config"""
