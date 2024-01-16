@@ -16,9 +16,9 @@
       "list_not_found": "Google Keep List not found"
     },
     "abort": {
-      "single_instance_allowed": "[%key:common::config_flow::abort::single_instance_allowed%]",
+      "already_configured": "List is already configured",
       "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
-      "reauth_successful": "Re-authentication was successful"
+      "reauth_successful": "[%key:common::config_flow::abort::reauth_successful%]"
     }
   }
 }
