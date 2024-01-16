@@ -1,9 +1,9 @@
 {
     "config": {
         "abort": {
+            "already_configured": "List is already configured",
             "dependency_not_found": "Shopping list integration needs to be setup before you can continue.",
-            "reauth_successful": "Re-authentication was successful",
-            "single_instance_allowed": "Already configured. Only a single configuration possible."
+            "reauth_successful": "Re-authentication was successful"
         },
         "error": {
             "cannot_login": "Failed to connect",
