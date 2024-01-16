@@ -7,7 +7,6 @@
     },
     "error": {
       "cannot_login": "Failed to connect",
-      "list_not_found": "Google Keep List not found",
       "unknown": "Unexpected error"
     },
     "step": {
@@ -16,7 +15,7 @@
           "list_title": "List title",
           "password": "Password",
           "username": "Username",
-          "master_token": "Master Token"
+          "access_token": "Master Token"
         }
       }
     }
