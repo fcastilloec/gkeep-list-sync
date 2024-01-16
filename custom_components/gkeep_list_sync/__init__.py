@@ -111,7 +111,7 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
     if config_entry.version == 1:
-        base_username = config_entry.data[CONF_USERNAME].partition("@")[0]
+        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace('.', '_')
         unique_id = f"{base_username}-{config_entry.data[CONF_LIST_ID]}"
         title = f"{config_entry.data[CONF_USERNAME]}  - {config_entry.data[CONF_LIST_TITLE]}"
         data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
@@ -119,6 +119,13 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
             config_entry, unique_id=unique_id, title=title, data=data
         )
         config_entry.version = 2
+
+    if config_entry.version == 2 and config_entry.minor_version == 1:
+        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace('.', '_')
+        hass.config_entries.async_update_entry(
+            config_entry, data={**config_entry.data, CONF_BASE_USERNAME: base_username}
+        )
+        config_entry.minor_version = 2
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 

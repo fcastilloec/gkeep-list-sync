@@ -86,7 +86,7 @@ async def validate_input(
         await hass.async_add_executor_job(keep.sync)
 
     config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
-    config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0]
+    config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0].replace('.', '_')
     config[CONF_LIST_ID] = glist.id
     config[CONF_LIST_TITLE] = user_input[CONF_LIST_TITLE]
     config[MISSING_LIST] = False
@@ -98,6 +98,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Keep List Sync."""
 
     VERSION = 2
+    MINOR_VERSION = 2
 
     def __init__(self) -> None:
         """Initialize the Google Keep config flow."""
