@@ -27,6 +27,7 @@ from .const import (
     SHOPPING_LIST_DOMAIN,
     CONF_LIST_TITLE,
     CONF_LIST_ID,
+    CONF_BASE_USERNAME,
     DEFAULT_LIST_TITLE,
     MISSING_LIST,
     MASTER_TOKEN
@@ -63,7 +64,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
             )
         elif data.get(MASTER_TOKEN) is None and data.get(CONF_PASSWORD) is None:
             _LOGGER.error("A password or master token is needed to setup a new service for gkeep-list-sync")
-            raise(InvalidConfig())
+            raise InvalidConfig()
         else:
             config[CONF_USERNAME] = data[CONF_USERNAME]
             await hass.async_add_executor_job(
@@ -87,6 +88,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
         await hass.async_add_executor_job(keep.sync)
 
     config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
+    config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0]
     config[CONF_LIST_ID] = glist.id
     config[CONF_LIST_TITLE] = data[CONF_LIST_TITLE]
     config[MISSING_LIST] = False
@@ -130,7 +132,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_LIST_TITLE,
                     default=self.list_title,
                 ): str,
-            },
+            }
         )
 
         # Schema for List name re-auth
@@ -165,11 +167,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
         else:
+            await self.async_set_unique_id(f"{info[CONF_BASE_USERNAME]}-{info[CONF_LIST_ID]}")
+            self._abort_if_unique_id_configured()
             if config_entry:
                 self.hass.config_entries.async_update_entry(config_entry, data=info)
                 await self.hass.config_entries.async_reload(config_entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
-            return self.async_create_entry(title=info[CONF_USERNAME], data=info)
+            title = info[CONF_USERNAME] + " - " + info[CONF_LIST_TITLE]
+            return self.async_create_entry(title=title, data=info)
 
     async def async_step_reauth(self, data: Mapping[str, Any]) -> FlowResult:
         """Handle configuration by re-auth."""
