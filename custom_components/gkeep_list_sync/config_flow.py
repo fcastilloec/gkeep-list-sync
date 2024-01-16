@@ -173,7 +173,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 self.hass.config_entries.async_update_entry(config_entry, data=info)
                 await self.hass.config_entries.async_reload(config_entry.entry_id)
                 return self.async_abort(reason="reauth_successful")
-            title = info[CONF_USERNAME] + " - " + info[CONF_LIST_TITLE]
+            title = f"{info[CONF_USERNAME]} - {info[CONF_LIST_TITLE]}"
             return self.async_create_entry(title=title, data=info)
 
     async def async_step_reauth(self, data: Mapping[str, Any]) -> FlowResult:

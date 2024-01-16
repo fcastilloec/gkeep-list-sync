@@ -14,6 +14,7 @@ from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from .const import (
     DOMAIN,
     CONF_LIST_ID,
+    CONF_LIST_TITLE,
     CONF_BASE_USERNAME,
     SHOPPING_LIST_DOMAIN,
     MISSING_LIST,
@@ -98,7 +99,7 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 def get_service_name(config_entry: ConfigEntry) -> str:
     """Retrieves the name for running a service."""
-    return SERVICE_NAME_BASE + "_" + config_entry.data.get(CONF_BASE_USERNAME)
+    return f"{SERVICE_NAME_BASE}_{config_entry.data[CONF_BASE_USERNAME]}_{config_entry.data[CONF_LIST_TITLE]}"
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate from an old configuration version."""
@@ -107,9 +108,10 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
     if config_entry.version == 1:
         base_username = config_entry.data[CONF_USERNAME].partition("@")[0]
         unique_id = f"{base_username}-{config_entry.data[CONF_LIST_ID]}"
+        title = f"{config_entry.data[CONF_USERNAME]}  - {config_entry.data[CONF_LIST_TITLE]}"
         data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
         hass.config_entries.async_update_entry(
-            config_entry, unique_id=unique_id, data=data
+            config_entry, unique_id=unique_id, title=title, data=data
         )
         config_entry.version = 2
 
