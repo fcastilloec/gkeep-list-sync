@@ -36,61 +36,60 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str, Any]:
-    """Validate the user input allows us to connect.
-
-    Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
-    """
+async def validate_input(
+    hass: HomeAssistant,
+    user_input: dict[str, Any],
+    reauth_entry: config_entries.ConfigEntry | None = None,
+) -> dict[str, Any]:
+    """Validate the user input allows us to connect."""
 
     config = {}
     keep = Keep()
 
     try:
-        if len(data) == 1:
-            # Get previous saved data
-            config_entry = hass.config_entries.async_entries(DOMAIN)[0]
-            config[CONF_USERNAME] = config_entry.data.get(CONF_USERNAME)
+        if reauth_entry and reauth_entry.data.get(MISSING_LIST):
+            config[CONF_USERNAME] = reauth_entry.data.get(CONF_USERNAME)
             await hass.async_add_executor_job(
                 keep.resume,
-                config_entry.data.get(CONF_USERNAME),
-                config_entry.data.get(CONF_ACCESS_TOKEN),
+                reauth_entry.data.get(CONF_USERNAME),
+                reauth_entry.data.get(CONF_ACCESS_TOKEN),
             )
-        elif data.get(MASTER_TOKEN) is not None:
-            config[CONF_USERNAME] = data[CONF_USERNAME]
+        elif user_input.get(MASTER_TOKEN):
+            config[CONF_USERNAME] = user_input[CONF_USERNAME]
             await hass.async_add_executor_job(
                 keep.resume,
-                data[CONF_USERNAME],
-                data[MASTER_TOKEN]
+                user_input[CONF_USERNAME],
+                user_input[MASTER_TOKEN]
             )
-        elif data.get(MASTER_TOKEN) is None and data.get(CONF_PASSWORD) is None:
-            _LOGGER.error("A password or master token is needed to setup a new service for gkeep-list-sync")
-            raise InvalidConfig()
-        else:
-            config[CONF_USERNAME] = data[CONF_USERNAME]
+        elif user_input.get(CONF_PASSWORD):
+            config[CONF_USERNAME] = user_input[CONF_USERNAME]
             await hass.async_add_executor_job(
                 keep.login,
-                data[CONF_USERNAME],
-                data[CONF_PASSWORD],
+                user_input[CONF_USERNAME],
+                user_input[CONF_PASSWORD],
             )
+        else:
+            _LOGGER.error("Invalid configuration provided.")
+            raise InvalidConfig()
     except LoginException as ex:
         _LOGGER.error("Login error: %s ", ex)
         raise CannotLogin() from ex
 
     # Find note or create it
     for note in keep.all():
-        if note.title == data[CONF_LIST_TITLE] and isinstance(note, GKeepList):
+        if note.title == user_input[CONF_LIST_TITLE] and isinstance(note, GKeepList):
             _LOGGER.debug("Valid list found: %s", note)
             glist = note
             break
     else:
-        _LOGGER.debug("List '%s' not found. Creating a new list", data[CONF_LIST_TITLE])
-        glist = keep.createList(title=data[CONF_LIST_TITLE])
+        _LOGGER.info("List '%s' not found. Creating a new list", user_input[CONF_LIST_TITLE])
+        glist = keep.createList(title=user_input[CONF_LIST_TITLE])
         await hass.async_add_executor_job(keep.sync)
 
     config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
     config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0]
     config[CONF_LIST_ID] = glist.id
-    config[CONF_LIST_TITLE] = data[CONF_LIST_TITLE]
+    config[CONF_LIST_TITLE] = user_input[CONF_LIST_TITLE]
     config[MISSING_LIST] = False
 
     return config
@@ -119,7 +118,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                config_data = await validate_input(self.hass, user_input)
+                config_data = await validate_input(self.hass, user_input, self.reauth_entry)
             except CannotLogin:
                 errors["base"] = "cannot_login"
             except Exception as ex:  # pylint: disable=broad-except
@@ -156,11 +155,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         # Schema for initial setup and re-authentications
+        msg="A Password or Master Token is needed but not both"
         return vol.Schema(
             {
                 vol.Required(CONF_USERNAME, default=self.username): str,
-                vol.Optional(CONF_PASSWORD): str,
-                vol.Optional(MASTER_TOKEN): str,
+                vol.Exclusive(CONF_PASSWORD, 'password/token', msg=msg): str,
+                vol.Exclusive(MASTER_TOKEN, 'password/token', msg=msg): str,
                 vol.Required(CONF_LIST_TITLE, default=self.list_title): str,
             }
         )
