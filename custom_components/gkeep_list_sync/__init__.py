@@ -14,6 +14,7 @@ from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from .const import (
     DOMAIN,
     CONF_LIST_ID,
+    CONF_BASE_USERNAME,
     SHOPPING_LIST_DOMAIN,
     MISSING_LIST,
     SERVICE_NAME_BASE,
@@ -96,4 +97,5 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
     return True
 
 def get_service_name(config_entry: ConfigEntry) -> str:
-    return SERVICE_NAME_BASE + "_" + config_entry.data.get(CONF_USERNAME).partition("@")[0]
+    """Retrieves the name for running a service."""
+    return SERVICE_NAME_BASE + "_" + config_entry.data.get(CONF_BASE_USERNAME)
