@@ -105,85 +105,73 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Initialize the Google Keep config flow."""
         self.username = None
         self.list_title = DEFAULT_LIST_TITLE
-        self.reauth = False
+        self.reauth_entry = None
         self.missing_list = False
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
         errors = {}
 
-        config_entry: config_entries.ConfigEntry = None
-
         # Check that the dependency is loaded
         if not self.hass.data.get(SHOPPING_LIST_DOMAIN):
             _LOGGER.error("Shopping List integration needs to be setup")
             return self.async_abort(reason="dependency_not_found")
 
-        # Schema for initial setup of loging re-auth
-        all_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_USERNAME,
-                    default=self.username,
-                ): str,
-                vol.Optional(CONF_PASSWORD): str,
-                vol.Optional(MASTER_TOKEN): str,
-                vol.Required(
-                    CONF_LIST_TITLE,
-                    default=self.list_title,
-                ): str,
-            }
-        )
+        if user_input is not None:
+            try:
+                config_data = await validate_input(self.hass, user_input)
+            except CannotLogin:
+                errors["base"] = "cannot_login"
+            except Exception as ex:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception: %s", ex)
+                errors["base"] = "unknown"
 
-        # Schema for List name re-auth
-        list_schema = vol.Schema(
-            {
-                vol.Required(
-                    CONF_LIST_TITLE,
-                    default=self.list_title,
-                ): str,
-            }
-        )
+            if not errors:
+                if self.reauth_entry:
+                    _LOGGER.debug("Updating Config Entry because of re-authentication")
+                    self.hass.config_entries.async_update_entry(self.reauth_entry, data=config_data)
+                    await self.hass.config_entries.async_reload(self.reauth_entry.entry_id)
+                    return self.async_abort(reason="reauth_successful")
 
-        if user_input is None:
-            if self.missing_list:
-                errors["list_title"] = "list_not_found"
-                return self.async_show_form(
-                    step_id="user",
-                    data_schema=list_schema,
-                    errors=errors,
+                _LOGGER.debug("Config Entry didn't exists, creating one")
+                await self.async_set_unique_id(f"{config_data[CONF_BASE_USERNAME]}-{config_data[CONF_LIST_ID]}")
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title=f"{config_data[CONF_USERNAME]} - {config_data[CONF_LIST_TITLE]}",
+                    data=config_data,
                 )
-            return self.async_show_form(
-                step_id="user",
-                data_schema=all_schema,
-                errors=errors,
+
+        return self.async_show_form(
+            step_id="user", data_schema=self._async_schema(), errors=errors,
+        )
+
+    def _async_schema(self):
+        """Fetch required schema with defaults."""
+        if self.missing_list:
+            # Schema for specifying only a new list name
+            return vol.Schema(
+                {
+                    vol.Required(CONF_LIST_TITLE, default=self.list_title): str,
+                }
             )
 
-        try:
-            info = await validate_input(self.hass, user_input)
-        except CannotLogin:
-            errors["base"] = "cannot_login"
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors["base"] = "unknown"
-        else:
-            await self.async_set_unique_id(f"{info[CONF_BASE_USERNAME]}-{info[CONF_LIST_ID]}")
-            self._abort_if_unique_id_configured()
-            if config_entry:
-                self.hass.config_entries.async_update_entry(config_entry, data=info)
-                await self.hass.config_entries.async_reload(config_entry.entry_id)
-                return self.async_abort(reason="reauth_successful")
-            title = f"{info[CONF_USERNAME]} - {info[CONF_LIST_TITLE]}"
-            return self.async_create_entry(title=title, data=info)
+        # Schema for initial setup and re-authentications
+        return vol.Schema(
+            {
+                vol.Required(CONF_USERNAME, default=self.username): str,
+                vol.Optional(CONF_PASSWORD): str,
+                vol.Optional(MASTER_TOKEN): str,
+                vol.Required(CONF_LIST_TITLE, default=self.list_title): str,
+            }
+        )
 
     async def async_step_reauth(self, data: Mapping[str, Any]) -> FlowResult:
         """Handle configuration by re-auth."""
-
         _LOGGER.debug("Re-authentication needed")
         self.username = data[CONF_USERNAME]
         self.list_title = data[CONF_LIST_TITLE]
-        self.reauth = True
-        self.missing_list = self.hass.data[DOMAIN][MISSING_LIST]
+        self.missing_list = data[MISSING_LIST]
+        self.reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         return await self.async_step_user()
 
 class CannotLogin(HomeAssistantError):

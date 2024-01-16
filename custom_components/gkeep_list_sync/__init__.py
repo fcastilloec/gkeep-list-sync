@@ -56,7 +56,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         return False
 
     if not keep.get(config_entry.data.get(CONF_LIST_ID)):
-        hass.data[DOMAIN] = {MISSING_LIST: True}  # the list is the problem
+        _LOGGER.error("List '%s' couldn't be found", config_entry.data.get(CONF_LIST_TITLE))
+        hass.config_entries.async_update_entry(
+            config_entry, data={**config_entry.data, MISSING_LIST: True},
+        ) # Update config to inform that the list is the problem
         raise ConfigEntryAuthFailed
 
     async def handle_sync_list(call) -> None:  # pylint: disable=unused-argument
@@ -67,7 +70,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
 
         # Check if the list still exists
         if not (glist := keep.get(config_entry.data.get(CONF_LIST_ID))):
-            hass.data[DOMAIN] = {MISSING_LIST: True}  # the list is the problem
+            _LOGGER.debug("List '%s' couldn't be found when syncing", config_entry.data.get(CONF_LIST_TITLE))
+            hass.config_entries.async_update_entry(
+                config_entry, data={**config_entry.data, MISSING_LIST: True},
+            ) # Update config to inform that the list is the problem
             config_entry.async_start_reauth(hass)
             return
 
