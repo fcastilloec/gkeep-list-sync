@@ -25,3 +25,22 @@ jobs:
           ignore: brands
       - name: Hassfest validation
         uses: "home-assistant/actions/hassfest@master"
+
+  publish:
+    name: Publish to Github Releases
+    needs: validate-hacs
+    runs-on: 'ubuntu-latest'
+    if: github.ref_type	== 'tag'
+
+    steps:
+    - name: Latest & Previous Tag
+      id: tags
+      uses: JinoArch/get-latest-tag@latest
+
+    - name: Create a release
+      uses: ncipollo/release-action@v1
+      with:
+        allowUpdates: true
+        body: https://github.com/fcastilloec/gkeep-list-sync/compare/v${{ steps.tags.outputs.previousTag }}...v${{ steps.tags.outputs.latestTag }}
+        draft: true
+        token: ${{ secrets.GITHUB_TOKEN }}
