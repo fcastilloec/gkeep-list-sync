@@ -41,6 +41,6 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         allowUpdates: true
-        body: https://github.com/fcastilloec/gkeep-list-sync/compare/v${{ steps.tags.outputs.previousTag }}...v${{ steps.tags.outputs.latestTag }}
-        draft: true
+        body: https://github.com/fcastilloec/gkeep-list-sync/compare/${{ steps.tags.outputs.previousTag }}...${{ steps.tags.outputs.latestTag }}
+        draft: false
         token: ${{ secrets.GITHUB_TOKEN }}
