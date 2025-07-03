@@ -9,8 +9,6 @@ on:
   pull_request:
     branches:
       - main
-  schedule:
-    - cron: "0 0 * * *"
   workflow_dispatch:
 
 jobs:
@@ -29,18 +27,18 @@ jobs:
   publish:
     name: Publish to Github Releases
     needs: validate-hacs
-    runs-on: 'ubuntu-latest'
+    runs-on: "ubuntu-latest"
     if: github.ref_type	== 'tag'
 
     steps:
-    - name: Latest & Previous Tag
-      id: tags
-      uses: JinoArch/get-latest-tag@latest
+      - name: Latest & Previous Tag
+        id: tags
+        uses: JinoArch/get-latest-tag@latest
 
-    - name: Create a release
-      uses: ncipollo/release-action@v1
-      with:
-        allowUpdates: true
-        body: https://github.com/fcastilloec/gkeep-list-sync/compare/${{ steps.tags.outputs.previousTag }}...${{ steps.tags.outputs.latestTag }}
-        draft: false
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create a release
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          body: https://github.com/fcastilloec/gkeep-list-sync/compare/${{ steps.tags.outputs.previousTag }}...${{ steps.tags.outputs.latestTag }}
+          draft: false
+          token: ${{ secrets.GITHUB_TOKEN }}
