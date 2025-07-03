@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     try:
         keep = Keep()
         await hass.async_add_executor_job(
-            keep.resume,
+            keep.authenticate,
             config_entry.data.get(CONF_USERNAME),
             config_entry.data.get(CONF_ACCESS_TOKEN),
         )

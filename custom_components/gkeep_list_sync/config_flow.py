@@ -44,14 +44,14 @@ async def validate_input(
         if reauth_entry and reauth_entry.data.get(MISSING_LIST):
             config[CONF_USERNAME] = reauth_entry.data.get(CONF_USERNAME)
             await hass.async_add_executor_job(
-                keep.resume,
+                keep.authenticate,
                 reauth_entry.data.get(CONF_USERNAME),
                 reauth_entry.data.get(CONF_ACCESS_TOKEN),
             )
         elif user_input.get(CONF_ACCESS_TOKEN):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
             await hass.async_add_executor_job(
-                keep.resume, user_input[CONF_USERNAME], user_input[CONF_ACCESS_TOKEN]
+                keep.authenticate, user_input[CONF_USERNAME], user_input[CONF_ACCESS_TOKEN]
             )
         elif user_input.get(CONF_PASSWORD):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
