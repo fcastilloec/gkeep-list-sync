@@ -8,6 +8,9 @@
   "integration_type": "service",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
-  "requirements": ["gkeepapi==0.15.1", "urllib3<2", "gpsoauth==1.1.1"],
+  "requirements": [
+    "gkeepapi==0.16.0",
+    "gpsoauth @ git+https://github.com/watkins-matt/gpsoauth.git@master"
+  ],
   "version": "1.1.4"
 }
