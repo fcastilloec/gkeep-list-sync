@@ -10,7 +10,7 @@
   "issue_tracker": "https://github.com/fcastilloec/gkeep-list-sync/issues",
   "requirements": [
     "gkeepapi==0.16.0",
-    "gpsoauth @ git+https://github.com/watkins-matt/gpsoauth.git@master"
+    "gpsoauth@git+https://github.com/watkins-matt/gpsoauth.git@master"
   ],
   "version": "1.1.4"
 }
