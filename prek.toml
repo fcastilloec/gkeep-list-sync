@@ -1,0 +1,42 @@
+# Configuration file for `prek`, a git hook framework written in Rust.
+# See https://prek.j178.dev for more information.
+#:schema https://www.schemastore.org/prek.json
+
+fail_fast = true
+
+[[repos]]
+repo = "https://github.com/commitizen-tools/commitizen"
+rev = "v4.13.9"
+hooks = [{ id = "commitizen" }]
+
+[[repos]]
+repo = "https://github.com/astral-sh/ruff-pre-commit"
+rev = "v0.15.11"
+hooks = [
+  {
+    id = "ruff-check",
+    args = ["--verbose"],
+  },
+  { id = "ruff-format" }
+]
+
+[[repos]]
+repo = "local"
+hooks = [
+  {
+    id = "cspell",
+    priority = 0,
+    name = "cspell",
+    language = "system",
+    entry = "cspell",
+    args = ["--no-summary", "--no-progress"]
+  },
+  {
+    id = "pyright",
+    priority = 0,
+    name = "pyright",
+    entry = "pyright",
+    language = "system",
+    types = ["python"]
+  }
+]

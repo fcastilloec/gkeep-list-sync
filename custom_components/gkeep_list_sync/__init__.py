@@ -65,7 +65,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         )  # Update config to inform that the list is the problem
         raise ConfigEntryAuthFailed
 
-    async def handle_sync_list(call) -> None:  # pylint: disable=unused-argument
+    async def handle_sync_list(call) -> None:
         """Handle synchronizing the Google Keep list with Shopping list."""
 
         # Sync to get any new items
@@ -106,7 +106,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     return True
 
 
-async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:  # pylint: disable=unused-argument
+async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.debug("Unload integration")
     hass.services.async_remove(DOMAIN, get_service_name(config_entry))

@@ -1,0 +1,4 @@
+[tool.pyright]
+reportMissingImports = "none"
+reportMissingModuleSource = "none"
+pythonVersion = "3.10"

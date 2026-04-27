@@ -20,7 +20,8 @@ This is meant to be used with Google Assistant to easily add items to the Home A
 5. Restart Home Assistant.
 6. In the Home Assistant Configuration, add the new integration by searching for its name.
 
-When creating a new service, you will be presented with three fields to fill in: 
+When creating a new service, you will be presented with three fields to fill in:
+
 - username (required)
 - password (optional)
 - master token (optional)
@@ -37,7 +38,7 @@ Each service will go through the following steps:
 2. Add each item to the Home Assistant Shopping List integration.
 3. Delete the item from the Google Keep list. This prevents double-adding an item if the service is called again.
 
-## Shoutouts/Credits
+## Shout-outs/Credits
 
 [@fcastilloec](https://github.com/fcastilloec) For creating this project and publishing it for us to use
 [@lhy](https://github.com/LeeHanYeong) For the docker container to reliably get a master token over on [ha-google-home](https://github.com/leikoilja/ha-google-home/issues/599#issuecomment-1760800334)

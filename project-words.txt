@@ -1,0 +1,15 @@
+fcastilloec
+github
+gkeep
+gkeepapi
+glist
+gpsoauth
+hacs
+hass
+hassfest
+Hassfest
+homeassistant
+Jino
+ncipollo
+pyright
+reauth

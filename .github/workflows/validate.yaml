@@ -25,7 +25,7 @@ jobs:
         uses: "home-assistant/actions/hassfest@master"
 
   publish:
-    name: Publish to Github Releases
+    name: Publish to GitHub Releases
     needs: validate-hacs
     runs-on: "ubuntu-latest"
     if: github.ref_type	== 'tag'
