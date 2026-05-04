@@ -11,5 +11,6 @@ Hassfest
 homeassistant
 Jino
 ncipollo
+prek
 pyright
 reauth
