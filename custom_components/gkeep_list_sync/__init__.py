@@ -7,7 +7,7 @@ import logging
 from gkeepapi import Keep
 from gkeepapi.exception import APIException, LoginException
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, VERSION
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
@@ -16,6 +16,7 @@ from .const import (
     CONF_LIST_ID,
     CONF_LIST_TITLE,
     DOMAIN,
+    INTEGRATION_VERSION,
     MISSING_LIST,
     SERVICE_NAME_BASE,
     SHOPPING_LIST_DOMAIN,
@@ -125,14 +126,14 @@ async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) ->
         title = f"{config_entry.data[CONF_USERNAME]}  - {config_entry.data[CONF_LIST_TITLE]}"
         data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
         hass.config_entries.async_update_entry(config_entry, unique_id=unique_id, title=title, data=data)
-        config_entry.version = VERSION
+        config_entry.version = INTEGRATION_VERSION
 
-    if config_entry.version == VERSION and config_entry.minor_version == OLD_VERSION:
+    if config_entry.version == INTEGRATION_VERSION and config_entry.minor_version == OLD_VERSION:
         base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
         hass.config_entries.async_update_entry(
             config_entry, data={**config_entry.data, CONF_BASE_USERNAME: base_username}
         )
-        config_entry.minor_version = VERSION
+        config_entry.minor_version = INTEGRATION_VERSION
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 

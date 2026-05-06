@@ -8,4 +8,4 @@ DEFAULT_LIST_TITLE = "Groceries"
 MISSING_LIST = "missing_list"
 SHOPPING_LIST_DOMAIN = "shopping_list"
 SERVICE_NAME_BASE = "sync"
-VERSION = 2
+INTEGRATION_VERSION = 2
