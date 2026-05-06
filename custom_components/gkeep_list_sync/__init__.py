@@ -30,7 +30,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
     hass.data.setdefault(DOMAIN, {})
 
     # Check for dependencies
-    if not hass.data.get(SHOPPING_LIST_DOMAIN):
+    if not hass.config_entries.async_entries(SHOPPING_LIST_DOMAIN):
         _LOGGER.error(
             "Shopping list integration is missing, please add it to Home Assistant and reload",
         )
