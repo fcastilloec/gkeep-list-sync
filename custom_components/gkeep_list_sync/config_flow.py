@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping
 import logging
+from collections.abc import Mapping
 from typing import Any
 
+import voluptuous as vol
 from gkeepapi import Keep
 from gkeepapi.exception import LoginException
 from gkeepapi.node import List as GKeepList
-import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant
@@ -74,16 +73,12 @@ async def validate_input(
             glist = note
             break
     else:
-        _LOGGER.info(
-            "List '%s' not found. Creating a new list", user_input[CONF_LIST_TITLE]
-        )
+        _LOGGER.info("List '%s' not found. Creating a new list", user_input[CONF_LIST_TITLE])
         glist = keep.createList(title=user_input[CONF_LIST_TITLE])
         await hass.async_add_executor_job(keep.sync)
 
     config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
-    config[CONF_BASE_USERNAME] = (
-        config[CONF_USERNAME].partition("@")[0].replace(".", "_")
-    )
+    config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0].replace(".", "_")
     config[CONF_LIST_ID] = glist.id
     config[CONF_LIST_TITLE] = user_input[CONF_LIST_TITLE]
     config[MISSING_LIST] = False
@@ -104,9 +99,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._reauth_entry: config_entries.ConfigEntry | None = None
         self._missing_list: bool = False
 
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, Any] = {}
 
@@ -117,9 +110,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                config_data = await validate_input(
-                    self.hass, user_input, self._reauth_entry
-                )
+                config_data = await validate_input(self.hass, user_input, self._reauth_entry)
             except CannotLogin:
                 errors["base"] = "cannot_login"
             except Exception:
@@ -129,18 +120,12 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 if self._reauth_entry:
                     _LOGGER.debug("Updating Config Entry because of re-authentication")
-                    self.hass.config_entries.async_update_entry(
-                        self._reauth_entry, data=config_data
-                    )
-                    await self.hass.config_entries.async_reload(
-                        self._reauth_entry.entry_id
-                    )
+                    self.hass.config_entries.async_update_entry(self._reauth_entry, data=config_data)
+                    await self.hass.config_entries.async_reload(self._reauth_entry.entry_id)
                     return self.async_abort(reason="reauth_successful")
 
                 _LOGGER.debug("Config Entry didn't exists, creating one")
-                await self.async_set_unique_id(
-                    f"{config_data[CONF_BASE_USERNAME]}-{config_data[CONF_LIST_ID]}"
-                )
+                await self.async_set_unique_id(f"{config_data[CONF_BASE_USERNAME]}-{config_data[CONF_LIST_ID]}")
                 self._abort_if_unique_id_configured()
                 return self.async_create_entry(
                     title=f"{config_data[CONF_USERNAME]} - {config_data[CONF_LIST_TITLE]}",
@@ -180,9 +165,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._username = data[CONF_USERNAME]
         self._list_title = data[CONF_LIST_TITLE]
         self._missing_list = data[MISSING_LIST]
-        self._reauth_entry = self.hass.config_entries.async_get_entry(
-            self.context["entry_id"]
-        )
+        self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
         return await self.async_step_user()
 
 

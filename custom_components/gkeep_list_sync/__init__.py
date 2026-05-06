@@ -6,11 +6,10 @@ import logging
 
 from gkeepapi import Keep
 from gkeepapi.exception import APIException, LoginException
-
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME, VERSION
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed, InvalidStateError
+from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from .const import (
     CONF_BASE_USERNAME,
@@ -56,9 +55,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         return False
 
     if not keep.get(config_entry.data.get(CONF_LIST_ID)):
-        _LOGGER.error(
-            "List '%s' couldn't be found", config_entry.data.get(CONF_LIST_TITLE)
-        )
+        _LOGGER.error("List '%s' couldn't be found", config_entry.data.get(CONF_LIST_TITLE))
         hass.config_entries.async_update_entry(
             config_entry,
             data={**config_entry.data, MISSING_LIST: True},
@@ -99,9 +96,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         await hass.async_add_executor_job(keep.sync)
 
     # Register the service - Allow for as many services as we have usernames
-    hass.services.async_register(
-        DOMAIN, get_service_name(config_entry), handle_sync_list
-    )
+    hass.services.async_register(DOMAIN, get_service_name(config_entry), handle_sync_list)
 
     return True
 
@@ -115,37 +110,29 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 def get_service_name(config_entry: ConfigEntry) -> str:
     """Retrieve the name for running a service."""
-    return (
-        f"{SERVICE_NAME_BASE}_"
-        f"{config_entry.data[CONF_BASE_USERNAME]}_"
-        f"{config_entry.data[CONF_LIST_TITLE]}"
-    )
+    return f"{SERVICE_NAME_BASE}_{config_entry.data[CONF_BASE_USERNAME]}_{config_entry.data[CONF_LIST_TITLE]}"
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate from an old configuration version."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
-    if config_entry.version == 1:
-        base_username = (
-            config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
-        )
+    OLD_VERSION = 1
+
+    if config_entry.version == OLD_VERSION:
+        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
         unique_id = f"{base_username}-{config_entry.data[CONF_LIST_ID]}"
         title = f"{config_entry.data[CONF_USERNAME]}  - {config_entry.data[CONF_LIST_TITLE]}"
         data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
-        hass.config_entries.async_update_entry(
-            config_entry, unique_id=unique_id, title=title, data=data
-        )
-        config_entry.version = 2
+        hass.config_entries.async_update_entry(config_entry, unique_id=unique_id, title=title, data=data)
+        config_entry.version = VERSION
 
-    if config_entry.version == 2 and config_entry.minor_version == 1:
-        base_username = (
-            config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
-        )
+    if config_entry.version == VERSION and config_entry.minor_version == OLD_VERSION:
+        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
         hass.config_entries.async_update_entry(
             config_entry, data={**config_entry.data, CONF_BASE_USERNAME: base_username}
         )
-        config_entry.minor_version = 2
+        config_entry.minor_version = VERSION
 
     _LOGGER.info("Migration to version %s successful", config_entry.version)
 

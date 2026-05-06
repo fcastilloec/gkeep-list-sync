@@ -6,7 +6,7 @@ fail_fast = true
 
 [[repos]]
 repo = "https://github.com/commitizen-tools/commitizen"
-rev = "v4.15.0"
+rev = "v4.15.1"
 hooks = [
   {
     id = "commitizen",
@@ -43,13 +43,5 @@ hooks = [
       "--no-progress",
       "--no-must-find-files",
     ]
-  },
-  {
-    id = "pyright",
-    priority = 0,
-    name = "pyright",
-    entry = "pyright",
-    language = "system",
-    types = ["python"]
   }
 ]
