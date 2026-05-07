@@ -104,7 +104,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors: dict[str, Any] = {}
 
         # Check that the dependency is loaded
-        if not self.config_entries.async_entries(SHOPPING_LIST_DOMAIN):
+        if not self.hass.config_entries.async_entries(SHOPPING_LIST_DOMAIN):
             _LOGGER.error("Shopping List integration needs to be setup")
             return self.async_abort(reason="dependency_not_found")
 
