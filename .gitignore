@@ -1,8 +1,18 @@
-__pycache__/
-.venv/
-test.py
-requirements.txt
-requirements-dev.txt
+# artifacts
+__pycache__
+.pytest*
+*.egg-info
+*/build/*
+*/dist/*
 
-config
-TODO
+
+# misc
+.coverage
+.vscode
+coverage.xml
+.ruff_cache
+
+
+# Home Assistant configuration
+config/*
+!config/configuration.yaml

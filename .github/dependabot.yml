@@ -1,10 +1,26 @@
 version: 2
 updates:
   # Maintain dependencies for GitHub Actions
-- package-ecosystem: github-actions
-  directory: "/"
-  commit-message:
-    prefix: ci
-  schedule:
-    interval: weekly
-    time: "18:45"
+  - package-ecosystem: github-actions
+    directory: "/"
+    commit-message:
+      prefix: ci
+    schedule:
+      timezone: "America/New_York"
+      interval: weekly
+      time: "18:45"
+
+  - package-ecosystem: "devcontainers"
+    directory: "/"
+    schedule:
+      timezone: "America/New_York"
+      interval: "weekly"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      timezone: "America/New_York"
+      interval: "daily"
+    ignore:
+      # Dependabot should not update Home Assistant as that should match the homeassistant key in hacs.json
+      - dependency-name: "homeassistant"
