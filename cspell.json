@@ -11,9 +11,9 @@
   "dictionaries": ["project-words"],
   "ignorePaths": [
     "/project-words.txt",
-    ".vscode/settings.json",
     ".gitignore",
-    "cspell.json",
-    "prek.toml"
+    "*.json",
+    "*.yml",
+    "*.toml"
   ]
 }

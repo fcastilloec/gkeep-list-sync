@@ -6,7 +6,7 @@ fail_fast = true
 
 [[repos]]
 repo = "https://github.com/commitizen-tools/commitizen"
-rev = "v4.15.1"
+rev = "v4.19.3"
 hooks = [
   {
     id = "commitizen",
@@ -16,7 +16,7 @@ hooks = [
 
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
-rev = "v0.15.12"
+rev = "v0.17.3"
 hooks = [
   {
     id = "ruff-check",
