@@ -9,12 +9,16 @@ updates:
       timezone: "America/New_York"
       interval: weekly
       time: "18:45"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "devcontainers"
     directory: "/"
     schedule:
       timezone: "America/New_York"
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   - package-ecosystem: "pip"
     directory: "/"
@@ -24,3 +28,5 @@ updates:
     ignore:
       # Dependabot should not update Home Assistant as that should match the homeassistant key in hacs.json
       - dependency-name: "homeassistant"
+    cooldown:
+      default-days: 3

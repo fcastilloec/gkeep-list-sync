@@ -1,44 +1,69 @@
 name: Validate
 
+# yamllint disable-line rule:truthy
 on:
   push:
     branches:
       - main
     tags:
-      - v[0-9]+.[0-9]+.[0-9]+
+      - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
     branches:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   validate-hacs:
-    runs-on: "ubuntu-latest"
+    name: Validate HACS and Hassfest
+    runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v7"
-      - name: HACS validation
-        uses: "hacs/action@main"
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          category: "integration"
+          persist-credentials: false
+
+      - name: HACS validation
+        uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
+        with:
+          category: integration
           ignore: brands
+
       - name: Hassfest validation
-        uses: "home-assistant/actions/hassfest@master"
+        uses: home-assistant/actions/hassfest@26d56ed1a1cbfeabf59feb7b26e368e13f47ef52 # master
 
   publish:
     name: Publish to GitHub Releases
     needs: validate-hacs
-    runs-on: "ubuntu-latest"
-    if: github.ref_type	== 'tag'
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'tag'
+    permissions:
+      contents: write # Required to create GitHub releases and compare tags
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
       - name: Latest & Previous Tag
         id: tags
-        uses: JinoArch/get-latest-tag@latest
+        uses: JinoArch/get-latest-tag@97f4fa11855e98585e5898d9cb62117fc04975a6 # latest
 
       - name: Create a release
-        uses: ncipollo/release-action@v1
-        with:
-          allowUpdates: true
-          body: https://github.com/fcastilloec/gkeep-list-sync/compare/${{ steps.tags.outputs.previousTag }}...${{ steps.tags.outputs.latestTag }}
-          draft: false
-          token: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREV_TAG: ${{ steps.tags.outputs.previousTag }}
+          LATEST_TAG: ${{ steps.tags.outputs.latestTag }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          BODY="https://github.com/${GH_REPO}/compare/${PREV_TAG}...${LATEST_TAG}"
+          gh release create "${LATEST_TAG}" \
+            --title "${LATEST_TAG}" \
+            --notes "${BODY}"

@@ -1,4 +1,6 @@
 """Constants for the Google Keep List Sync integration."""
+# Copyright (c) 2026 Felipe Castillo <fcastillo.ec@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 DOMAIN = "gkeep_list_sync"
 CONF_LIST_TITLE = "list_title"
