@@ -1,0 +1,6 @@
+*.md
+.strict-typing
+homeassistant/components/*/translations/*.json
+homeassistant/generated/*
+tests/fixtures/core/config/yaml_errors/
+tests/e2e/pnpm-lock.yaml
