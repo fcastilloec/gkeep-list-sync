@@ -2,7 +2,7 @@
 module.exports = {
   overrides: [
     {
-      files: "./homeassistant/**/*.json",
+      files: "./custom_components/**/*.json",
       options: {
         plugins: [require.resolve("prettier-plugin-sort-json")],
         jsonRecursiveSort: true,

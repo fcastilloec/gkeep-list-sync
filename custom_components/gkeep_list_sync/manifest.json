@@ -1,6 +1,10 @@
 {
   "domain": "gkeep_list_sync",
   "name": "Google Keep List Sync",
+  "categories": [
+    "productivity_information.shopping_groceries",
+    "other_ecosystems"
+  ],
   "codeowners": ["@fcastilloec"],
   "config_flow": true,
   "dependencies": ["shopping_list"],
