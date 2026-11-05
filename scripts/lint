@@ -4,4 +4,4 @@ set -e
 
 cd "$(dirname "$0")/.."
 
-rek run --all-files
+prek run --all-files

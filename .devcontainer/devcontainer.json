@@ -52,7 +52,7 @@
       "version": "3.14"
     },
     "ghcr.io/devcontainers-extra/features/apt-packages:1": {
-      "packages": "ffmpeg,libturbojpeg0,libpcap-dev,gnupg2"
+      "packages": "ffmpeg,libturbojpeg0,libpcap-dev"
     },
     "ghcr.io/devcontainers-extra/features/prek:1": {},
     "ghcr.io/devcontainer-community/devcontainer-features/delta:1": {}
