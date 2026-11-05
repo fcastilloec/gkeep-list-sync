@@ -1,10 +1,11 @@
 """Config flow for Google Keep List Sync integration."""
+# Copyright (c) 2026 Felipe Castillo <fcastillo.ec@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
 import logging
-from collections.abc import Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import voluptuous as vol
 from gkeepapi import Keep
@@ -12,8 +13,6 @@ from gkeepapi.exception import LoginException
 from gkeepapi.node import List as GKeepList
 from homeassistant import config_entries
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_PASSWORD, CONF_USERNAME
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
@@ -26,6 +25,12 @@ from .const import (
     SHOPPING_LIST_DOMAIN,
 )
 
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from homeassistant.core import HomeAssistant
+    from homeassistant.data_entry_flow import FlowResult
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -35,7 +40,6 @@ async def validate_input(
     reauth_entry: config_entries.ConfigEntry | None = None,
 ) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
-
     config: dict[str, Any] = {}
     keep = Keep()
 
@@ -50,7 +54,9 @@ async def validate_input(
         elif user_input.get(CONF_ACCESS_TOKEN):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
             await hass.async_add_executor_job(
-                keep.authenticate, user_input[CONF_USERNAME], user_input[CONF_ACCESS_TOKEN]
+                keep.authenticate,
+                user_input[CONF_USERNAME],
+                user_input[CONF_ACCESS_TOKEN],
             )
         elif user_input.get(CONF_PASSWORD):
             config[CONF_USERNAME] = user_input[CONF_USERNAME]
@@ -61,10 +67,10 @@ async def validate_input(
             )
         else:
             _LOGGER.error("Invalid configuration provided")
-            raise InvalidConfig
+            raise InvalidConfigError
     except LoginException as ex:
-        _LOGGER.error("Login error: %s ", ex)
-        raise CannotLogin from ex
+        _LOGGER.exception("Login error: %s ")
+        raise CannotLoginError from ex
 
     # Find note or create it
     for note in keep.all():
@@ -73,12 +79,16 @@ async def validate_input(
             glist = note
             break
     else:
-        _LOGGER.info("List '%s' not found. Creating a new list", user_input[CONF_LIST_TITLE])
+        _LOGGER.info(
+            "List '%s' not found. Creating a new list", user_input[CONF_LIST_TITLE]
+        )
         glist = keep.createList(title=user_input[CONF_LIST_TITLE])
         await hass.async_add_executor_job(keep.sync)
 
     config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
-    config[CONF_BASE_USERNAME] = config[CONF_USERNAME].partition("@")[0].replace(".", "_")
+    config[CONF_BASE_USERNAME] = (
+        config[CONF_USERNAME].partition("@")[0].replace(".", "_")
+    )
     config[CONF_LIST_ID] = glist.id
     config[CONF_LIST_TITLE] = user_input[CONF_LIST_TITLE]
     config[MISSING_LIST] = False
@@ -99,7 +109,9 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._reauth_entry: config_entries.ConfigEntry | None = None
         self._missing_list: bool = False
 
-    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> FlowResult:
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> FlowResult:
         """Handle the initial step."""
         errors: dict[str, Any] = {}
 
@@ -110,8 +122,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             try:
-                config_data = await validate_input(self.hass, user_input, self._reauth_entry)
-            except CannotLogin:
+                config_data = await validate_input(
+                    self.hass, user_input, self._reauth_entry
+                )
+            except CannotLoginError:
                 errors["base"] = "cannot_login"
             except Exception:
                 _LOGGER.exception("Unexpected exception")
@@ -120,15 +134,23 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not errors:
                 if self._reauth_entry:
                     _LOGGER.debug("Updating Config Entry because of re-authentication")
-                    self.hass.config_entries.async_update_entry(self._reauth_entry, data=config_data)
-                    await self.hass.config_entries.async_reload(self._reauth_entry.entry_id)
+                    self.hass.config_entries.async_update_entry(
+                        self._reauth_entry, data=config_data
+                    )
+                    await self.hass.config_entries.async_reload(
+                        self._reauth_entry.entry_id
+                    )
                     return self.async_abort(reason="reauth_successful")
 
                 _LOGGER.debug("Config Entry didn't exists, creating one")
-                await self.async_set_unique_id(f"{config_data[CONF_BASE_USERNAME]}-{config_data[CONF_LIST_ID]}")
+                await self.async_set_unique_id(
+                    f"{config_data[CONF_BASE_USERNAME]}-{config_data[CONF_LIST_ID]}"
+                )
                 self._abort_if_unique_id_configured()
+                username = config_data[CONF_USERNAME]
+                list_title = config_data[CONF_LIST_TITLE]
                 return self.async_create_entry(
-                    title=f"{config_data[CONF_USERNAME]} - {config_data[CONF_LIST_TITLE]}",
+                    title=f"{username} - {list_title}",
                     data=config_data,
                 )
 
@@ -138,7 +160,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    def _async_schema(self):
+    def _async_schema(self) -> vol.Schema:
         """Fetch required schema with defaults."""
         if self._missing_list:
             # Schema for specifying only a new list name
@@ -165,13 +187,15 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._username = data[CONF_USERNAME]
         self._list_title = data[CONF_LIST_TITLE]
         self._missing_list = data[MISSING_LIST]
-        self._reauth_entry = self.hass.config_entries.async_get_entry(self.context["entry_id"])
+        self._reauth_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
         return await self.async_step_user()
 
 
-class CannotLogin(HomeAssistantError):
+class CannotLoginError(HomeAssistantError):
     """Error to indicate we cannot login."""
 
 
-class InvalidConfig(HomeAssistantError):
+class InvalidConfigError(HomeAssistantError):
     """Error to indicate the user entered invalid config."""
