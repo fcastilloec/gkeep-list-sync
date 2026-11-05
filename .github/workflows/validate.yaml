@@ -36,7 +36,7 @@ jobs:
           ignore: brands
 
       - name: Hassfest validation
-        uses: home-assistant/actions/hassfest@26d56ed1a1cbfeabf59feb7b26e368e13f47ef52 # master
+        uses: home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
 
   publish:
     name: Publish to GitHub Releases
