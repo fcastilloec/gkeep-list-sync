@@ -1,0 +1,46 @@
+name: Lint
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    branches:
+      - "main"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ruff:
+    name: "Ruff"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements_common.txt
+            requirements_lint.txt
+
+      - name: Install requirements
+        run: |
+          python3 -m pip install -r requirements_common.txt
+          python3 -m pip install -r requirements_lint.txt
+
+      - name: Lint
+        run: python3 -m ruff check .
+
+      - name: Format
+        run: python3 -m ruff format . --check
