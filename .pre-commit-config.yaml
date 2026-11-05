@@ -1,0 +1,62 @@
+repos:
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v4.19.3
+    hooks:
+      - id: commitizen
+        priority: 0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.3
+    hooks:
+      - id: ruff-check
+        args:
+          - --fix
+      - id: ruff-format
+        files: ^((homeassistant|packages|script|tests)/.+)?[^/]+\.(py|pyi)$
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.3
+    hooks:
+      - id: codespell
+        args:
+          - --ignore-words-list=aiport,astroid,checkin,currenty,hass,iif,incomfort,lookin,nam,NotIn
+          - --skip="./.*,*.csv,*.json,*.ambr"
+          - --quiet-level=2
+        exclude_types: [csv, json, html]
+        exclude: ^tests/fixtures/|homeassistant/generated/|tests/components/.*/snapshots/
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.31.1
+    hooks:
+      - id: zizmor
+        args:
+          - --pedantic
+          - --no-online-audits
+        exclude: ^\.github/workflows/.*\.lock\.yml$
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-executables-have-shebangs
+        stages: [manual]
+      - id: check-json
+        exclude: |
+          (?x)^(
+            .vscode|
+            .devcontainer|
+            tests/fixtures/core/backup_restore/restore1.json
+          )
+      - id: no-commit-to-branch
+        args:
+          - --branch=dev
+          - --branch=master
+          - --branch=rc
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.38.0
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/rbubley/mirrors-prettier
+    rev: v3.6.2
+    hooks:
+      - id: prettier
+        additional_dependencies:
+          - prettier@3.6.2
+          - prettier-plugin-sort-json@4.2.0
+        exclude: ^\.github/workflows/.*\.lock\.yml$
+        stages: [pre-commit]

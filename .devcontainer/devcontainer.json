@@ -1,56 +1,60 @@
 {
-	"name": "ludeeus/integration_blueprint",
-	"image": "mcr.microsoft.com/devcontainers/base:debian",
-	"postCreateCommand": "scripts/setup",
-	"forwardPorts": [8123],
-	"portsAttributes": {
-		"8123": {
-			"label": "Home Assistant",
-			"onAutoForward": "notify"
-		}
-	},
-	"runArgs": ["--label", "dockhand.notify=false"],
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"charliermarsh.ruff",
-				"esbenp.prettier-vscode",
-				"github.vscode-pull-request-github",
-				"ms-python.python",
-				"ms-python.vscode-pylance",
-				"ryanluker.vscode-coverage-gutters"
-			],
-			"settings": {
-				"files.eol": "\n",
-				"editor.formatOnPaste": true,
-				"editor.formatOnSave": true,
-				"editor.formatOnType": true,
-				"files.trimTrailingWhitespace": true,
-				"python.analysis.typeCheckingMode": "basic",
-				"python.analysis.autoImportCompletions": true,
-				"[python]": {
-					"editor.defaultFormatter": "charliermarsh.ruff"
-				},
-				"[json]": {
-					"editor.defaultFormatter": "esbenp.prettier-vscode"
-				},
-				"[jsonc]": {
-					"editor.defaultFormatter": "esbenp.prettier-vscode"
-				},
-				"[yaml]": {
-					"editor.defaultFormatter": "esbenp.prettier-vscode"
-				}
-			}
-		}
-	},
-	"remoteUser": "vscode",
-	"features": {
-		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.14"
-		},
-		"ghcr.io/devcontainers-extra/features/apt-packages:1": {
-			"packages": "ffmpeg,libturbojpeg0,libpcap-dev"
-		},
-		"ghcr.io/devcontainers-extra/features/prek:1": {}
-	}
+  "name": "ludeeus/integration_blueprint",
+  "image": "mcr.microsoft.com/devcontainers/base:debian",
+  "postCreateCommand": "scripts/setup",
+  "forwardPorts": [8123],
+  "portsAttributes": {
+    "8123": {
+      "label": "Home Assistant",
+      "onAutoForward": "notify"
+    }
+  },
+  "remoteEnv": {
+    "GPG_TTY": "/dev/console"
+  },
+  "runArgs": ["--label", "dockhand.notify=false"],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "esbenp.prettier-vscode",
+        "github.vscode-pull-request-github",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ryanluker.vscode-coverage-gutters"
+      ],
+      "settings": {
+        "files.eol": "\n",
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "files.trimTrailingWhitespace": true,
+        "python.analysis.typeCheckingMode": "basic",
+        "python.analysis.autoImportCompletions": true,
+        "[python]": {
+          "editor.defaultFormatter": "charliermarsh.ruff"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[yaml]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        }
+      }
+    }
+  },
+  "remoteUser": "vscode",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.14"
+    },
+    "ghcr.io/devcontainers-extra/features/apt-packages:1": {
+      "packages": "ffmpeg,libturbojpeg0,libpcap-dev,gnupg2"
+    },
+    "ghcr.io/devcontainers-extra/features/prek:1": {},
+    "ghcr.io/devcontainer-community/devcontainer-features/delta:1": {}
+  }
 }
