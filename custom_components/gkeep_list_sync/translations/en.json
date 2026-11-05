@@ -12,18 +12,18 @@
     "step": {
       "user": {
         "data": {
+          "access_token": "Master Token",
           "list_title": "List title",
           "password": "Password",
-          "username": "Username",
-          "access_token": "Master Token"
+          "username": "Username"
         }
       }
     }
   },
   "services": {
     "sync_list": {
-      "name": "Synchronize lists",
-      "description": "Synchronize Google Keep list with a Home Assistant Shopping List, and delete the already synced items from Google Keep"
+      "description": "Synchronize Google Keep list with a Home Assistant Shopping List, and delete the already synced items from Google Keep",
+      "name": "Synchronize lists"
     }
   }
 }

@@ -1,14 +1,15 @@
 """The Google Keep List Sync integration."""
+# Copyright (c) 2026 Felipe Castillo <fcastillo.ec@gmail.com>
+# SPDX-License-Identifier: GPL-3.0-or-later
 
 from __future__ import annotations
 
 import logging
+from typing import TYPE_CHECKING
 
 from gkeepapi import Keep
 from gkeepapi.exception import APIException, LoginException
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
-from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryAuthFailed
 
 from .const import (
@@ -22,18 +23,21 @@ from .const import (
     SHOPPING_LIST_DOMAIN,
 )
 
+if TYPE_CHECKING:
+    from homeassistant.config_entries import ConfigEntry
+    from homeassistant.core import HomeAssistant, ServiceCall
+
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Set up of Google Keep List component."""
-
     hass.data.setdefault(DOMAIN, {})
 
     # Check for dependencies
     if not hass.config_entries.async_entries(SHOPPING_LIST_DOMAIN):
         _LOGGER.error(
-            "Shopping list integration is missing, please add it to Home Assistant and reload",
+            "Shopping list integration is missing, add it to Home Assistant and reload",
         )
         return False
 
@@ -47,25 +51,24 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         )
     except LoginException as ex:
         raise ConfigEntryAuthFailed from ex
-    except APIException as ex:
-        _LOGGER.error(
-            "Unable to communicate with Google Keep API (error code %s): %s",
-            ex.code,
-            ex,
+    except APIException:
+        _LOGGER.exception(
+            "Unable to communicate with Google Keep API (error code %s): %s"
         )
         return False
 
     if not keep.get(config_entry.data.get(CONF_LIST_ID)):
-        _LOGGER.error("List '%s' couldn't be found", config_entry.data.get(CONF_LIST_TITLE))
+        _LOGGER.error(
+            "List '%s' couldn't be found", config_entry.data.get(CONF_LIST_TITLE)
+        )
         hass.config_entries.async_update_entry(
             config_entry,
             data={**config_entry.data, MISSING_LIST: True},
         )  # Update config to inform that the list is the problem
         raise ConfigEntryAuthFailed
 
-    async def handle_sync_list(call) -> None:
+    async def handle_sync_list(_call: ServiceCall) -> None:
         """Handle synchronizing the Google Keep list with Shopping list."""
-
         # Sync to get any new items
         await hass.async_add_executor_job(keep.sync)
 
@@ -89,7 +92,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
                 "shopping_list",
                 "add_item",
                 {"name": item.text},
-                True,
+                blocking=True,
             )
             await hass.async_add_executor_job(item.delete)
 
@@ -97,7 +100,9 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> b
         await hass.async_add_executor_job(keep.sync)
 
     # Register the service - Allow for as many services as we have usernames
-    hass.services.async_register(DOMAIN, get_service_name(config_entry), handle_sync_list)
+    hass.services.async_register(
+        DOMAIN, get_service_name(config_entry), handle_sync_list
+    )
 
     return True
 
@@ -111,25 +116,34 @@ async def async_unload_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> 
 
 def get_service_name(config_entry: ConfigEntry) -> str:
     """Retrieve the name for running a service."""
-    return f"{SERVICE_NAME_BASE}_{config_entry.data[CONF_BASE_USERNAME]}_{config_entry.data[CONF_LIST_TITLE]}"
+    username = config_entry.data[CONF_BASE_USERNAME]
+    list_title = config_entry.data[CONF_LIST_TITLE]
+    return f"{SERVICE_NAME_BASE}_{username}_{list_title}"
 
 
 async def async_migrate_entry(hass: HomeAssistant, config_entry: ConfigEntry) -> bool:
     """Migrate from an old configuration version."""
     _LOGGER.debug("Migrating from version %s", config_entry.version)
 
-    OLD_VERSION = 1
+    old_version = 1
+    username = config_entry.data[CONF_USERNAME]
+    list_title = config_entry.data[CONF_LIST_TITLE]
 
-    if config_entry.version == OLD_VERSION:
-        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
+    if config_entry.version == old_version:
+        base_username = username.partition("@")[0].replace(".", "_")
         unique_id = f"{base_username}-{config_entry.data[CONF_LIST_ID]}"
-        title = f"{config_entry.data[CONF_USERNAME]}  - {config_entry.data[CONF_LIST_TITLE]}"
+        title = f"{username}  - {list_title}"
         data = {**config_entry.data, CONF_BASE_USERNAME: base_username}
-        hass.config_entries.async_update_entry(config_entry, unique_id=unique_id, title=title, data=data)
+        hass.config_entries.async_update_entry(
+            config_entry, unique_id=unique_id, title=title, data=data
+        )
         config_entry.version = INTEGRATION_VERSION
 
-    if config_entry.version == INTEGRATION_VERSION and config_entry.minor_version == OLD_VERSION:
-        base_username = config_entry.data[CONF_USERNAME].partition("@")[0].replace(".", "_")
+    if (
+        config_entry.version == INTEGRATION_VERSION
+        and config_entry.minor_version == old_version
+    ):
+        base_username = username.partition("@")[0].replace(".", "_")
         hass.config_entries.async_update_entry(
             config_entry, data={**config_entry.data, CONF_BASE_USERNAME: base_username}
         )
