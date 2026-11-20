@@ -14,7 +14,6 @@
         "data": {
           "access_token": "Master token",
           "list_title": "List title",
-          "password": "[%key:common::config_flow::data::password%]",
           "username": "[%key:common::config_flow::data::username%]"
         }
       }

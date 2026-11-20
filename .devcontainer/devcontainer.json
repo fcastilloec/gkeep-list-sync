@@ -9,9 +9,6 @@
       "onAutoForward": "notify"
     }
   },
-  "remoteEnv": {
-    "GPG_TTY": "/dev/console"
-  },
   "runArgs": ["--label", "dockhand.notify=false"],
   "customizations": {
     "vscode": {

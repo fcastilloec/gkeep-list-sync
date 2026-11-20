@@ -20,13 +20,12 @@ This is meant to be used with Google Assistant to easily add items to the Home A
 5. Restart Home Assistant.
 6. In the Home Assistant Configuration, add the new integration by searching for its name.
 
-When creating a new service, you will be presented with three fields to fill in:
+When creating a new service, you will be presented with thwo fields to fill in:
 
 - username (required)
-- password (optional)
-- master token (optional)
+- master token (required)
 
-You will need to fill out either a password or master token as a way of authenticating to your Google account via `gkeepapi`. App passwords are highly recommended, but if you encounter authentication errors, see the [Authentication Options](https://github.com/fcastilloec/gkeep-list-sync/wiki/Authentication-Options) wiki page for other methods.
+It's your responsibility to retrieve a master token, and out of the scope of this project on how to get one. For some guidance, see [Authentication](https://github.com/fcastilloec/gkeep-list-sync/wiki/Authentication) wiki page.
 
 ## Usage
 
@@ -40,5 +39,5 @@ Each service will go through the following steps:
 
 ## Shout-outs/Credits
 
-[@fcastilloec](https://github.com/fcastilloec) For creating this project and publishing it for us to use
+[@fcastilloec](https://github.com/fcastilloec) Creator of this project
 [@lhy](https://github.com/LeeHanYeong) For the docker container to reliably get a master token over on [ha-google-home](https://github.com/leikoilja/ha-google-home/issues/599#issuecomment-1760800334)
