@@ -12,7 +12,7 @@ from gkeepapi import Keep
 from gkeepapi.exception import LoginException
 from gkeepapi.node import List as GKeepList
 from homeassistant import config_entries
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
 from homeassistant.exceptions import HomeAssistantError
 
 from .const import (
@@ -40,34 +40,25 @@ async def validate_input(
     reauth_entry: config_entries.ConfigEntry | None = None,
 ) -> dict[str, Any]:
     """Validate the user input allows us to connect."""
-    config: dict[str, Any] = {}
     keep = Keep()
 
+    # Where are the credentials coming from
+    if reauth_entry and reauth_entry.data.get(MISSING_LIST):
+        username = reauth_entry.data.get(CONF_USERNAME)
+        access_token = reauth_entry.data.get(CONF_ACCESS_TOKEN)
+    elif user_input.get(CONF_ACCESS_TOKEN):
+        username = user_input[CONF_USERNAME]
+        access_token = user_input[CONF_ACCESS_TOKEN]
+    else:
+        _LOGGER.error("Invalid configuration provided")
+        raise InvalidConfigError
+
     try:
-        if reauth_entry and reauth_entry.data.get(MISSING_LIST):
-            config[CONF_USERNAME] = reauth_entry.data.get(CONF_USERNAME)
-            await hass.async_add_executor_job(
-                keep.authenticate,
-                reauth_entry.data.get(CONF_USERNAME),
-                reauth_entry.data.get(CONF_ACCESS_TOKEN),
-            )
-        elif user_input.get(CONF_ACCESS_TOKEN):
-            config[CONF_USERNAME] = user_input[CONF_USERNAME]
-            await hass.async_add_executor_job(
-                keep.authenticate,
-                user_input[CONF_USERNAME],
-                user_input[CONF_ACCESS_TOKEN],
-            )
-        elif user_input.get(CONF_PASSWORD):
-            config[CONF_USERNAME] = user_input[CONF_USERNAME]
-            await hass.async_add_executor_job(
-                keep.login,
-                user_input[CONF_USERNAME],
-                user_input[CONF_PASSWORD],
-            )
-        else:
-            _LOGGER.error("Invalid configuration provided")
-            raise InvalidConfigError
+        await hass.async_add_executor_job(
+            keep.authenticate,
+            user_input[CONF_USERNAME],
+            user_input[CONF_ACCESS_TOKEN],
+        )
     except LoginException as ex:
         _LOGGER.exception("Login error: %s ")
         raise CannotLoginError from ex
@@ -85,15 +76,15 @@ async def validate_input(
         glist = keep.createList(title=user_input[CONF_LIST_TITLE])
         await hass.async_add_executor_job(keep.sync)
 
-    config[CONF_ACCESS_TOKEN] = keep.getMasterToken()
-    config[CONF_BASE_USERNAME] = (
-        config[CONF_USERNAME].partition("@")[0].replace(".", "_")
-    )
-    config[CONF_LIST_ID] = glist.id
-    config[CONF_LIST_TITLE] = user_input[CONF_LIST_TITLE]
-    config[MISSING_LIST] = False
-
-    return config
+    # Create config object for persistence
+    return {
+        CONF_USERNAME: username,
+        CONF_ACCESS_TOKEN: access_token,
+        CONF_BASE_USERNAME: username.partition("@")[0].replace(".", "_"),
+        CONF_LIST_ID: glist.id,
+        CONF_LIST_TITLE: user_input[CONF_LIST_TITLE],
+        MISSING_LIST: False,
+    }
 
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
@@ -171,12 +162,10 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             )
 
         # Schema for initial setup and re-authentications
-        msg = "A Password or Master Token is needed but not both"
         return vol.Schema(
             {
                 vol.Required(CONF_USERNAME, default=self._username): str,
-                vol.Exclusive(CONF_PASSWORD, "password/token", msg=msg): str,
-                vol.Exclusive(CONF_ACCESS_TOKEN, "password/token", msg=msg): str,
+                vol.Required(CONF_ACCESS_TOKEN): str,
                 vol.Required(CONF_LIST_TITLE, default=self._list_title): str,
             }
         )
