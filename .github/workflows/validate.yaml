@@ -54,7 +54,7 @@ jobs:
 
       - name: Latest & Previous Tag
         id: tags
-        uses: JinoArch/get-latest-tag@97f4fa11855e98585e5898d9cb62117fc04975a6 # latest
+        uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42 # latest
 
       - name: Create a release
         env:
